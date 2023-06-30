@@ -1,28 +1,47 @@
-FROM debian:9
+FROM ubuntu:20.04
+MAINTAINER HoaLN <l.ngochoa97@gmail.com>
 
-MAINTAINER Ivan Ermilov <ivan.s.ermilov@gmail.com>
-MAINTAINER Giannis Mouchakis <gmouchakis@iit.demokritos.gr>
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Ho_Chi_Minh
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends apt-utils
+RUN apt-get install -y --no-install-recommends \
+      locales \
+      tzdata \
       openjdk-8-jdk \
       net-tools \
       curl \
       netcat \
       gnupg \
       libsnappy-dev \
+      vim \
+      iputils-ping \
+      rename \
+      python3.6 \
     && rm -rf /var/lib/apt/lists/*
+
+RUN apt update && apt install python3 -y
+
+RUN locale-gen en_US.UTF-8
+
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
       
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
 RUN curl -O https://dist.apache.org/repos/dist/release/hadoop/common/KEYS
 
 RUN gpg --import KEYS
 
-ENV HADOOP_VERSION 3.2.1
-ENV HADOOP_URL https://www.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
+ENV HADOOP_VERSION 3.2.2
+ENV HADOOP_URL https://archive.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
+
+COPY hadoop.tar.gz /tmp
 
 RUN set -x \
-    && curl -fSL "$HADOOP_URL" -o /tmp/hadoop.tar.gz \
+    # && curl -fSL "$HADOOP_URL" -o /tmp/hadoop.tar.gz \
     && curl -fSL "$HADOOP_URL.asc" -o /tmp/hadoop.tar.gz.asc \
     && gpg --verify /tmp/hadoop.tar.gz.asc \
     && tar -xvf /tmp/hadoop.tar.gz -C /opt/ \
@@ -36,6 +55,7 @@ RUN mkdir /hadoop-data
 
 ENV HADOOP_HOME=/opt/hadoop-$HADOOP_VERSION
 ENV HADOOP_CONF_DIR=/etc/hadoop
+ENV HADOOP_CLASSPATH=/etc/hadoop:/opt/hadoop-3.2.2/share/hadoop/common/lib/*:/opt/hadoop-3.2.2/share/hadoop/common/*:/opt/hadoop-3.2.2/share/hadoop/hdfs:/opt/hadoop-3.2.2/share/hadoop/hdfs/lib/*:/opt/hadoop-3.2.2/share/hadoop/hdfs/*:/opt/hadoop-3.2.2/share/hadoop/mapreduce/lib/*:/opt/hadoop-3.2.2/share/hadoop/mapreduce/*:/opt/hadoop-3.2.2/share/hadoop/yarn:/opt/hadoop-3.2.2/share/hadoop/yarn/lib/*:/opt/hadoop-3.2.2/share/hadoop/yarn/*
 ENV MULTIHOMED_NETWORK=1
 ENV USER=root
 ENV PATH $HADOOP_HOME/bin/:$PATH

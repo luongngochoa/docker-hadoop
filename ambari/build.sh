@@ -1,0 +1,1 @@
+docker build -t hoaln/ambari:2.7.6 .

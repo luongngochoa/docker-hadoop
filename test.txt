@@ -1,0 +1,82 @@
+.
+├── base
+│   ├── build.sh
+│   ├── Dockerfile
+│   ├── entrypoint.sh
+│   └── hadoop.tar.gz
+├── base_with_tez
+│   ├── build.sh
+│   ├── Dockerfile
+│   ├── Dockerfile.bak
+│   ├── tez-0.10.1.tar.gz
+│   └── tez-site.xml
+├── conf
+│   └── hue.ini
+├── data
+│   └── container_data
+├── datanode
+│   ├── build.sh
+│   ├── Dockerfile
+│   └── run.sh
+├── docker-compose-v2.yml
+├── docker-compose.yml
+├── hadoop.env
+├── historyserver
+│   ├── build.sh
+│   ├── Dockerfile
+│   └── run.sh
+├── hiveserver
+│   ├── apache-hive-3.1.3-bin.tar.gz
+│   ├── build.sh
+│   ├── ca_certificates
+│   ├── Dockerfile
+│   ├── Dockerfile.bak.1
+│   ├── hive-env.sh
+│   ├── hive-site.xml
+│   ├── run.sh
+│   └── test.txt
+├── log.sh
+├── Makefile
+├── namenode
+│   ├── build.sh
+│   ├── Dockerfile
+│   └── run.sh
+├── nginx
+│   ├── bde-hadoop.css
+│   ├── default.conf
+│   ├── Dockerfile
+│   └── materialize.min.css
+├── nodemanager
+│   ├── build.sh
+│   ├── Dockerfile
+│   └── run.sh
+├── README.md
+├── resourcemanager
+│   ├── build.sh
+│   ├── Dockerfile
+│   └── run.sh
+├── start.sh
+├── stop.sh
+└── test.txt
+
+13 directories, 46 files
+
+ENV TOMCAT_VERSION 9.0.56
+
+apt-get install -y curl
+
+# Install Tomcat for serving Tez UI
+RUN curl -LO https://downloads.apache.org/tomcat/tomcat-9/v9.0.56/bin/apache-tomcat-9.0.56.tar.gz && \
+    tar -xvf apache-tomcat-9.0.56.tar.gz && \
+    mv apache-tomcat-9.0.56 /opt/tomcat && \
+    rm apache-tomcat-9.0.56.tar.gz
+
+# Download and deploy Tez UI
+RUN curl -LO https://repo1.maven.org/maven2/org/apache/tez/tez-ui/0.10.1/tez-ui-0.10.1.war && \
+    mv tez-ui-0.10.1.war /opt/tomcat/webapps/tez-ui.war
+
+# Expose Tez UI port
+EXPOSE 8080
+
+# Start Tomcat and serve Tez UI
+CMD ["/opt/tomcat/bin/catalina.sh", "run"]
